@@ -15,19 +15,33 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - redis_data:/data  
+      - redis_data:/data
   web:
-    ## TODO
-  test:
-    build: .
-    command: bundle exec rspec
+    build:
+      context: .
+    ports:
+      - 3000:3000
     volumes:
-      - .:/rails
+      - .:/store
+      - rubygems:/usr/local/bundle
     depends_on:
       - db
-      - redis 
+      - redis
     environment:
-      - DATABASE_URL: postgresql://postgres:password@db:5432/myapp_test
-      - REDIS_URL: redis://redis:6379/0
+      - DATABASE_URL=postgresql://postgres:password@db:5432/store_development
+      - REDIS_URL=redis://redis:6379/0
+  test:
+    build: .
+    command: bash -c 'bin/rails db:create --environment test && bin/rails db:migrate --environment test && bundle exec rspec'
+    volumes:
+      - .:/store
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/store_test
+      - REDIS_URL=redis://redis:6379/0
 volumes:
   postgres13:
+  redis_data:
+  rubygems:
