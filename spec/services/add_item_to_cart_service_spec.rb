@@ -7,22 +7,18 @@ RSpec.describe AddItemToCartService do
 
   describe '#call' do
     context 'when the product exists' do
-      it 'adds a new item to the cart if it does not exist' do
+      let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 1, price: 10.0) }
+
+      it 'increments the quantity of the existing item' do
         expect {
-          described_class.new(cart, product.id, 2).call
-        }.to change(cart.cart_items, :count).by(1)
+          described_class.new(cart, product.id, 3).call
+        }.to_not change(cart.cart_items, :count)
 
-        cart_item = cart.cart_items.first
-
-        expect(cart_item.product).to eq(product)
-        expect(cart_item.quantity).to eq(2)
-        expect(cart_item.price).to eq(10.0)
-        expect(cart.total_price).to eq(20.0)
+        expect(cart_item.reload.quantity).to eq(4)
+        expect(cart.reload.total_price).to eq(40.0)
       end
 
       it 'increments the quantity of an existing item in the cart' do
-        create(:cart_item, cart: cart, product: product, quantity: 1, price: 10.0)
-
         expect {
           described_class.new(cart, product.id, 3).call
         }.to_not change(cart.cart_items, :count)
@@ -30,14 +26,13 @@ RSpec.describe AddItemToCartService do
         cart_item = cart.cart_items.first
 
         expect(cart_item.quantity).to eq(4)
-        expect(cart.total_price).to eq(40.0)
+        expect(cart.reload.total_price).to eq(40.0)
       end
 
-      it 'updates total price when item already exists' do
-        create(:cart_item, cart: cart, product: product, quantity: 1, price: 10.0)
-
+      it 'updates total price correctly' do
         described_class.new(cart, product.id, 2).call
 
+        expect(cart_item.reload.quantity).to eq(3)
         expect(cart.reload.total_price).to eq(30.0)
       end
     end

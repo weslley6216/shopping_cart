@@ -1,12 +1,10 @@
-class AddItemToCartService
-  class ProductNotFoundError < StandardError; end
+class AddItemToCartService < BaseCartService
   class InvalidQuantityError < StandardError; end
 
-  attr_reader :cart, :product_id, :quantity
+  attr_reader :quantity
 
   def initialize(cart, product_id, quantity)
-    @cart = cart
-    @product_id = product_id
+    super(cart, product_id)
     @quantity = quantity.to_i
   end
 
@@ -40,8 +38,5 @@ class AddItemToCartService
     cart_item
   end
 
-  def find_product(product_id) = Product.find(product_id)
   def save_cart_item!(cart_item) = cart_item.save!
-  def update_cart_total_price!(cart) = cart.update!(total_price: calculate_total_price(cart))
-  def calculate_total_price(cart) = cart.cart_items.sum('quantity * price')
 end
