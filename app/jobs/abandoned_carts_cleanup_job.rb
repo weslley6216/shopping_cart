@@ -2,8 +2,12 @@ class AbandonedCartsCleanupJob < ApplicationJob
   queue_as :default
 
   def perform
+    Rails.logger.info('[AbandonedCartsCleanupJob] Starting cleanup...')
+
     mark_abandoned_carts
     remove_old_abandoned_carts
+
+    Rails.logger.info('[AbandonedCartsCleanupJob] Cleanup finished.')
   end
 
   private

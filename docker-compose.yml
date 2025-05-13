@@ -17,6 +17,18 @@ services:
     env_file:
       - .env
 
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - .:/store
+      - rubygems:/usr/local/bundle
+    env_file:
+      - .env
+
   web:
     build:
       context: .
