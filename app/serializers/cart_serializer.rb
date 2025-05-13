@@ -1,6 +1,6 @@
 class CartSerializer < ActiveModel::Serializer
   attributes :id, :products, :total_price
+  has_many :cart_items, key: :products, serializer: CartItemSerializer
 
-  def products = object.cart_items.map { |item| CartItemSerializer.new(item) }
   def total_price = object.total_price.to_f
 end

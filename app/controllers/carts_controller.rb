@@ -13,6 +13,14 @@ class CartsController < ApplicationController
     render json: cart, serializer: CartSerializer, status: :created
   end
 
+  def show
+    cart = current_cart
+
+    return render json: { error: 'Cart not found' }, status: :not_found if cart.blank?
+
+    render json: cart, serializer: CartSerializer
+  end
+
   private
 
   def current_cart = Cart.find_by(id: session[:cart_id])
