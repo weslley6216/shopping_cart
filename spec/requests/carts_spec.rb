@@ -4,35 +4,87 @@ RSpec.describe 'Carts API', type: :request do
   let(:product) { create(:product, name: 'Camiseta', price: 10.0) }
 
   describe 'POST /cart' do
-    it 'creates a new cart with a product' do
-      post '/cart', params: { product_id: product.id, quantity: 2 }
+    context 'when the request is valid' do
+      it 'creates a new cart with a product' do
+        post '/cart', params: { product_id: product.id, quantity: 2 }
 
-      expect(response).to have_http_status(:created)
-      expect(parsed_response).to eq(
-        id: Cart.last.id,
-        total_price: 20.0,
-        products: [
-          {
-            id: product.id,
-            name: 'Camiseta',
-            quantity: 2,
-            unit_price: 10.0,
-            total_items_price: 20.0
-          }
-        ]
-      )
+        expect(response).to have_http_status(:created)
+        expect(parsed_response).to eq(
+          id: Cart.last.id,
+          total_price: 20.0,
+          products: [
+            {
+              id: product.id,
+              name: 'Camiseta',
+              quantity: 2,
+              unit_price: 10.0,
+              total_items_price: 20.0
+            }
+          ]
+        )
+      end
+
+      it 'stores cart_id in the session' do
+        post '/cart', params: { product_id: product.id, quantity: 2 }
+
+        expect(session[:cart_id]).to eq(Cart.last.id)
+      end
     end
 
-    it 'returns 404 if the product does not exist' do
-      post '/cart', params: { product_id: 999, quantity: 2 }
-      expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)['error']).to eq('Product not found')
+    context 'when the product already exists in the cart' do
+      it 'does not create a new cart but updates the quantity' do
+        post '/cart', params: { product_id: product.id, quantity: 2 }
+        post '/cart', params: { product_id: product.id, quantity: 1 }
+
+        expect(response).to have_http_status(:created)
+        expect(parsed_response[:products].first[:quantity]).to eq(3)
+      end
     end
 
-    it 'returns 422 if the quantity is invalid' do
-      post '/cart', params: { product_id: product.id, quantity: 0 }
-      expect(response).to have_http_status(:unprocessable_entity)
-      expect(JSON.parse(response.body)['error']).to eq('Quantity must be greater than zero.')
+    context 'when adding different products to the cart' do
+      let(:product2) { create(:product, name: 'Boné', price: 15.0) }
+
+      it 'calculates the total price correctly' do
+        post '/cart', params: { product_id: product.id, quantity: 2 }
+        post '/cart', params: { product_id: product2.id, quantity: 1 }
+
+        expect(response).to have_http_status(:created)
+        expect(parsed_response[:total_price]).to eq(35.0)
+      end
+    end
+
+    context 'when the product does not exist' do
+      it 'returns 404' do
+        post '/cart', params: { product_id: 999, quantity: 2 }
+
+        expect(response).to have_http_status(:not_found)
+        expect(parsed_response[:error]).to eq('Product not found')
+      end
+    end
+
+    context 'when the quantity is invalid' do
+      it 'returns 422' do
+        post '/cart', params: { product_id: product.id, quantity: 0 }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(parsed_response[:error]).to eq('Quantity must be greater than zero.')
+      end
+    end
+
+    context 'when required params are missing' do
+      it 'returns 400 if product_id is missing' do
+        post '/cart', params: { quantity: 2 }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(parsed_response[:error]).to eq('param is missing or the value is empty: product_id')
+      end
+
+      it 'returns 400 if quantity is missing' do
+        post '/cart', params: { product_id: product.id }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(parsed_response[:error]).to eq('param is missing or the value is empty: quantity')
+      end
     end
   end
 
