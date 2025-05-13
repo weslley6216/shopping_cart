@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 ruby '3.3.1'
 
+gem 'active_model_serializers', '~> 0.10.15'
 gem 'bootsnap', require: false
 gem 'guard'
 gem 'guard-livereload', require: false

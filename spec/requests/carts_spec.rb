@@ -1,21 +1,26 @@
 require 'rails_helper'
 
-RSpec.describe "/carts", type: :request do
-  pending "TODO: Escreva os testes de comportamento do controller de carrinho necessários para cobrir a sua implmentação #{__FILE__}"
-  describe "POST /add_items" do
-    let(:cart) { Cart.create }
-    let(:product) { Product.create(name: "Test Product", price: 10.0) }
-    let!(:cart_item) { CartItem.create(cart: cart, product: product, quantity: 1) }
+RSpec.describe 'Carts API', type: :request do
+  let(:product) { create(:product, name: 'Camiseta', price: 10.0) }
 
-    context 'when the product already is in the cart' do
-      subject do
-        post '/cart/add_items', params: { product_id: product.id, quantity: 1 }, as: :json
-        post '/cart/add_items', params: { product_id: product.id, quantity: 1 }, as: :json
-      end
+  describe 'POST /carts' do
+    it 'creates a new cart with a product' do
+      post '/carts', params: { product_id: product.id, quantity: 2 }
 
-      it 'updates the quantity of the existing item in the cart' do
-        expect { subject }.to change { cart_item.reload.quantity }.by(2)
-      end
+      expect(response).to have_http_status(:created)
+      expect(parsed_response).to eq(
+        id: Cart.last.id,
+        total_price: 20.0,
+        products: [
+          {
+            id: product.id,
+            name: 'Camiseta',
+            quantity: 2,
+            unit_price: 10.0,
+            total_price: 20.0
+          }
+        ]
+      )
     end
   end
 end
