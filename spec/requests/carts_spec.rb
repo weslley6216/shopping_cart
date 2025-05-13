@@ -123,9 +123,7 @@ RSpec.describe 'Carts API', type: :request do
   end
 
   describe 'POST /cart/add_item' do
-    before do
-      post '/cart', params: { product_id: product.id, quantity: 1 }
-    end
+    before { post '/cart', params: { product_id: product.id, quantity: 1 } }
 
     context 'when adding the same product again' do
       it 'increments the quantity and updates total price' do
@@ -177,9 +175,43 @@ RSpec.describe 'Carts API', type: :request do
         )
       end
     end
+
+    context 'when product does not exist' do
+      it 'returns not found error' do
+        post '/cart/add_item', params: { product_id: 999, quantity: 1 }
+
+        expect(response).to have_http_status(:not_found)
+        expect(parsed_response).to eq({ error: 'Product not found' })
+      end
+    end
+
+    context 'when quantity is invalid' do
+      it 'returns unprocessable entity error' do
+        post '/cart/add_item', params: { product_id: product.id, quantity: 0 }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(parsed_response).to eq({ error: 'Quantity must be greater than zero.' })
+      end
+    end
+
+    context 'when required parameters are missing' do
+      it 'returns bad request when product_id is missing' do
+        post '/cart/add_item', params: { quantity: 1 }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(parsed_response).to eq({ error: 'param is missing or the value is empty: product_id' })
+      end
+
+      it 'returns bad request when quantity is missing' do
+        post '/cart/add_item', params: { product_id: product.id }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(parsed_response).to eq({ error: 'param is missing or the value is empty: quantity' })
+      end
+    end
   end
 
-  describe 'DELETE /cart/:product_id' do
+  describe 'DELETE /cart/remove_item' do
     let(:product) { create(:product, name: 'Boné', price: 15.0) }
     let(:cart) { create(:cart) }
     let(:item) { create(:cart_item, cart: cart, product: product, quantity: 2, price: 15.0) }
