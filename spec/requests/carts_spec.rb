@@ -22,6 +22,18 @@ RSpec.describe 'Carts API', type: :request do
         ]
       )
     end
+
+    it 'returns 404 if the product does not exist' do
+      post '/cart', params: { product_id: 999, quantity: 2 }
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)['error']).to eq('Product not found')
+    end
+
+    it 'returns 422 if the quantity is invalid' do
+      post '/cart', params: { product_id: product.id, quantity: 0 }
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)['error']).to eq('Quantity must be greater than zero.')
+    end
   end
 
   describe 'GET /cart' do
@@ -111,17 +123,6 @@ RSpec.describe 'Carts API', type: :request do
             }
           ]
         )
-      end
-    end
-
-    context 'when there is no cart in the session' do
-      before { allow_any_instance_of(CartsController).to receive(:current_cart).and_return(nil) }
-
-      it 'returns not found' do
-        post '/cart/add_item', params: { product_id: product.id, quantity: 1 }
-
-        expect(response).to have_http_status(:not_found)
-        expect(parsed_response).to eq({ error: 'Cart not found' })
       end
     end
   end

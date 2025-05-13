@@ -1,51 +1,25 @@
 class CartsController < ApplicationController
+  rescue_from AddItemToCartService::ProductNotFoundError, with: :render_product_not_found
+  rescue_from AddItemToCartService::InvalidQuantityError, with: :render_invalid_quantity_error
+
+  before_action :set_current_cart, only: %i[create add_item remove_item]
+
   def create
-    product = Product.find(cart_params[:product_id])
-    quantity = cart_params[:quantity].to_i
-
-    cart = current_cart || Cart.new(total_price: 0)
-    cart_item = cart.cart_items.find_by(product_id: product.id)
-
-    if cart_item
-      cart_item.quantity += quantity
-      cart_item.save!
-    else
-      cart.cart_items.build(product: product, quantity: quantity, price: product.price)
-      cart.save!
-    end
-
-    cart.update!(total_price: cart.cart_items.sum('quantity * price'))
-
+    cart = AddItemToCartService.new(@current_cart, params[:product_id], params[:quantity]).call
     session[:cart_id] = cart.id
+
     render json: cart, serializer: CartSerializer, status: :created
+  end
+
+  def add_item
+    cart = AddItemToCartService.new(@current_cart, params[:product_id], params[:quantity]).call
+
+    render json: cart, serializer: CartSerializer, status: :ok
   end
 
   def show
     cart = current_cart
-
-    return render json: { error: 'Cart not found' }, status: :not_found if cart.blank?
-
-    render json: cart, serializer: CartSerializer
-  end
-
-  def add_item
-    cart = current_cart
-    return render json: { error: 'Cart not found' }, status: :not_found unless cart
-
-    product = Product.find(cart_params[:product_id])
-    quantity = cart_params[:quantity].to_i
-
-    item = cart.cart_items.find_by(product: product)
-
-    if item
-      item.quantity += quantity
-    else
-      item = cart.cart_items.build(product: product, quantity: quantity, price: product.price)
-    end
-
-    item.save!
-
-    cart.update!(total_price: cart.cart_items.sum('quantity * price'))
+    return render json: { error: 'Cart not found' }, status: :not_found unless current_cart
 
     render json: cart, serializer: CartSerializer, status: :ok
   end
@@ -77,6 +51,13 @@ class CartsController < ApplicationController
 
   private
 
+  def set_current_cart
+    @current_cart = current_cart || Cart.new(total_price: 0)
+  end
+
   def current_cart = Cart.find_by(id: session[:cart_id])
   def cart_params = params.permit(:product_id, :quantity)
+
+  def render_product_not_found = render json: { error: 'Product not found' }, status: :not_found
+  def render_invalid_quantity_error(error) = render json: { error: error.message }, status: :unprocessable_entity
 end
