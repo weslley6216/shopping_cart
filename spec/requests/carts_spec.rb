@@ -57,4 +57,72 @@ RSpec.describe 'Carts API', type: :request do
       end
     end
   end
+
+  describe 'POST /cart/add_item' do
+    before do
+      post '/cart', params: { product_id: product.id, quantity: 1 }
+    end
+
+    context 'when adding the same product again' do
+      it 'increments the quantity and updates total price' do
+        post '/cart/add_item', params: { product_id: product.id, quantity: 2 }
+
+        expect(response).to have_http_status(:ok)
+        expect(parsed_response).to eq(
+          id: Cart.last.id,
+          total_price: 30.0,
+          products: [
+            {
+              id: product.id,
+              name: 'Camiseta',
+              quantity: 3,
+              unit_price: 10.0,
+              total_price: 30.0
+            }
+          ]
+        )
+      end
+    end
+
+    context 'when adding a new product' do
+      let(:other_product) { create(:product, name: 'Boné', price: 15.0) }
+
+      it 'adds a new item to the cart' do
+        post '/cart/add_item', params: { product_id: other_product.id, quantity: 1 }
+
+        expect(response).to have_http_status(:ok)
+        expect(parsed_response).to eq(
+          id: Cart.last.id,
+          total_price: 25.0,
+          products: [
+            {
+              id: product.id,
+              name: 'Camiseta',
+              quantity: 1,
+              unit_price: 10.0,
+              total_price: 10.0
+            },
+            {
+              id: other_product.id,
+              name: 'Boné',
+              quantity: 1,
+              unit_price: 15.0,
+              total_price: 15.0
+            }
+          ]
+        )
+      end
+    end
+
+    context 'when there is no cart in the session' do
+      before { delete '/cart' }
+
+      it 'returns not found' do
+        post '/cart/add_item', params: { product_id: product.id, quantity: 1 }
+
+        expect(response).to have_http_status(:not_found)
+        expect(parsed_response).to eq({ error: 'Cart not found' })
+      end
+    end
+  end
 end
