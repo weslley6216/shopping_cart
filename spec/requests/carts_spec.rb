@@ -17,7 +17,7 @@ RSpec.describe 'Carts API', type: :request do
             name: 'Camiseta',
             quantity: 2,
             unit_price: 10.0,
-            total_price: 20.0
+            total_items_price: 20.0
           }
         ]
       )
@@ -41,7 +41,7 @@ RSpec.describe 'Carts API', type: :request do
               name: 'Camiseta',
               quantity: 2,
               unit_price: 10.0,
-              total_price: 20.0
+              total_items_price: 20.0
             }
           ]
         )
@@ -77,7 +77,7 @@ RSpec.describe 'Carts API', type: :request do
               name: 'Camiseta',
               quantity: 3,
               unit_price: 10.0,
-              total_price: 30.0
+              total_items_price: 30.0
             }
           ]
         )
@@ -100,14 +100,14 @@ RSpec.describe 'Carts API', type: :request do
               name: 'Camiseta',
               quantity: 1,
               unit_price: 10.0,
-              total_price: 10.0
+              total_items_price: 10.0
             },
             {
               id: other_product.id,
               name: 'Boné',
               quantity: 1,
               unit_price: 15.0,
-              total_price: 15.0
+              total_items_price: 15.0
             }
           ]
         )
@@ -115,13 +115,39 @@ RSpec.describe 'Carts API', type: :request do
     end
 
     context 'when there is no cart in the session' do
-      before { delete '/cart' }
+      before { allow_any_instance_of(CartsController).to receive(:current_cart).and_return(nil) }
 
       it 'returns not found' do
         post '/cart/add_item', params: { product_id: product.id, quantity: 1 }
 
         expect(response).to have_http_status(:not_found)
         expect(parsed_response).to eq({ error: 'Cart not found' })
+      end
+    end
+  end
+
+  describe 'DELETE /cart/:product_id' do
+    let(:product) { create(:product, name: 'Boné', price: 15.0) }
+    let(:cart) { create(:cart) }
+    let(:item) { create(:cart_item, cart: cart, product: product, quantity: 2, price: 15.0) }
+
+    before { post '/cart', params: { product_id: product.id, quantity: 1 } }
+
+    context 'when product is in the cart' do
+      it 'removes the product and returns the updated cart' do
+        delete "/cart/#{product.id}"
+
+        expect(response).to have_http_status(:ok)
+        expect(parsed_response[:message]).to eq('Cart is empty')
+      end
+    end
+
+    context 'when product is not in the cart' do
+      it 'returns error message' do
+        delete '/cart/999'
+
+        expect(response).to have_http_status(:not_found)
+        expect(parsed_response[:error]).to eq('Product not found')
       end
     end
   end
