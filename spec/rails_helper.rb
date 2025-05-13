@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-ENV['RAILS_ENV'] = 'test'
+ENV['RAILS_ENV'] ||= 'test'
 require_relative '../config/environment'
 
 abort('The Rails environment is running in production mode!') if Rails.env.production?
@@ -13,10 +13,6 @@ rescue ActiveRecord::PendingMigrationError => e
 end
 
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
-
-if ENV['RAILS_ENV'] == 'test'
-  DatabaseCleaner.allow_remote_database_url = true
-end
 
 RSpec.configure do |config|
   config.fixture_paths = [Rails.root.join('spec/fixtures')]
