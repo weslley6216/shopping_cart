@@ -4,10 +4,17 @@ class CartsController < ApplicationController
     quantity = cart_params[:quantity].to_i
 
     cart = current_cart || Cart.new(total_price: 0)
-    cart.total_price += product.price * quantity
-    cart.cart_items.build(product: product, quantity: quantity, price: product.price)
+    cart_item = cart.cart_items.find_by(product_id: product.id)
 
-    return render json: { errors: cart.errors.full_messages }, status: :unprocessable_entity unless cart.save
+    if cart_item
+      cart_item.quantity += quantity
+      cart_item.save!
+    else
+      cart.cart_items.build(product: product, quantity: quantity, price: product.price)
+      cart.save!
+    end
+
+    cart.update!(total_price: cart.cart_items.sum('quantity * price'))
 
     session[:cart_id] = cart.id
     render json: cart, serializer: CartSerializer, status: :created
@@ -42,10 +49,7 @@ class CartsController < ApplicationController
 
     render json: cart, serializer: CartSerializer, status: :ok
   end
-
-  def destroy
-    session.delete(:cart_id)
-    head :no_content
+  
   end
 
   private
