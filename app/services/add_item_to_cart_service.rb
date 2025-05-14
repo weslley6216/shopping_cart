@@ -10,9 +10,9 @@ class AddItemToCartService < BaseCartService
 
   def call
     product = find_product(product_id)
-    normalized_quantity = validate_quantity(quantity)
-    cart_item = find_or_build_cart_item(cart, product, normalized_quantity)
+    raise InvalidQuantityError, 'Quantity must be greater than zero.' if quantity <= 0
 
+    cart_item = find_or_build_cart_item(cart, product, quantity)
     cart_item.save!
     update_cart_total_price!(cart)
 
@@ -22,12 +22,6 @@ class AddItemToCartService < BaseCartService
   end
 
   private
-
-  def validate_quantity(quantity)
-    raise InvalidQuantityError, 'Quantity must be greater than zero.' if quantity <= 0
-
-    quantity
-  end
 
   def find_or_build_cart_item(cart, product, quantity)
     cart_item = cart.cart_items.find_by(product_id: product.id)
