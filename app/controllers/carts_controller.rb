@@ -40,9 +40,10 @@ class CartsController < ApplicationController
   end
 
   def cart_params
-    params.require(:product_id)
-    params.require(:quantity)
-    params.permit(:product_id, :quantity)
+    params.permit(:product_id, :quantity).tap do |param|
+      param.require(:product_id)
+      param.require(:quantity)
+    end
   end
 
   def current_cart = Cart.find_by(id: session[:cart_id])
