@@ -18,4 +18,8 @@ class Cart < ApplicationRecord
   def remove_if_abandoned
     destroy! if abandoned? && updated_at <= 7.days.ago
   end
+
+  def empty?
+    cart_items.empty?
+  end
 end
