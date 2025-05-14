@@ -1,218 +1,303 @@
-# Desafio técnico e-commerce
+# Shopping Cart
 
-## Nossas expectativas
+Shopping Cart is an application that simulates shopping cart operations, allowing users to create, add items, list and remove products from a cart.
 
-A equipe de engenharia da RD Station tem alguns princípios nos quais baseamos nosso trabalho diário. Um deles é: projete seu código para ser mais fácil de entender, não mais fácil de escrever.
+## Features
 
-Portanto, para nós, é mais importante um código de fácil leitura do que um que utilize recursos complexos e/ou desnecessários.
+- **Cart creation:** Allows the creation of a shopping cart if a cart does not exist for the user's session.
+- **Adding products to cart:** Adds products to the cart, automatically adjusting the quantity and total price.
+- **Removing products from cart:** Removes specific products from the cart, updating the total price as items are deleted.
+- **Dynamic price calculation:** Prices are recalculated dynamically, immediately reflecting changes when adding or removing products.
+- **Scheduled job with sidekiq and redis:** Uses Sidekiq in conjunction with Redis to manage scheduled tasks, such as deleting abandoned carts, executing these operations automatically based on configured cron jobs.
 
-O que gostaríamos de ver:
+## Technologies
 
-- O código deve ser fácil de ler. Clean Code pode te ajudar.
-- Notas gerais e informações sobre a versão da linguagem e outras informações importantes para executar seu código.
-- Código que se preocupa com a performance (complexidade de algoritmo).
-- O seu código deve cobrir todos os casos de uso presentes no README, mesmo que não haja um teste implementado para tal.
-- A adição de novos testes é sempre bem-vinda.
-- Você deve enviar para nós o link do repositório público com a aplicação desenvolvida (GitHub, BitBucket, etc.).
+- Ruby 3.3.1
+- Rails 7.1.3.2
+- RSpec 6.1.0
+- PostgreSQL 16
+- Redis 7.0.15
 
-## O Desafio - Carrinho de compras
-O desafio consiste em uma API para gerenciamento do um carrinho de compras de e-commerce.
+## API endpoints
 
-Você deve desenvolver utilizando a linguagem Ruby e framework Rails, uma API Rest que terá 3 endpoins que deverão implementar as seguintes funcionalidades:
+| Endpoint            | Method    | Description                                                                       |
+| :-------------------| :---------| :------------------------------------------------------------------------------ |
+| `/cart`             | POST      | Creates a new cart and adds a product and quantity to it.                      |
+| `/cart`             | GET       | Returns the current session's cart with the list of products and total price.    |
+| `/cart/add_item`    | POST      | Adds a product to the cart with a specific quantity.                           |
+| `/cart/:product_id` | DELETE    | Removes a product from the cart.                                              |
+| `/products`         | GET       | Returns a list of all products.                                                 |
+| `/products/:id`     | GET       | Returns a specific product.                                                     |
+| `/products`         | POST      | Creates a new product.                                                          |
+| `/products/:id`     | PATCH/PUT | Updates an existing product.                                                    |
+| `/products/:id`     | DELETE    | Deletes a product.                                                              |
 
-### 1. Registrar um produto no carrinho
-Criar um endpoint para inserção de produtos no carrinho.
+## Setup and execution
 
-Se não existir um carrinho para a sessão, criar o carrinho e salvar o ID do carrinho na sessão.
+1. Ensure you have Docker installed locally.
+2. Clone this repository:
 
-Adicionar o produto no carrinho e devolver o payload com a lista de produtos do carrinho atual.
+    ```bash
+    git clone git@github.com:weslley6216/shopping_cart.git
+    ```
 
+3. Navigate to the project directory:
 
-ROTA: `/cart`
-Payload:
-```js
-{
-  "product_id": 345, // id do produto sendo adicionado
-  "quantity": 2, // quantidade de produto a ser adicionado
-}
-```
+    ```bash
+    cd shopping_cart
+    ```
 
-Response
-```js
-{
-  "id": 789, // id do carrinho
-  "products": [
-    {
-      "id": 645,
-      "name": "Nome do produto",
-      "quantity": 2,
-      "unit_price": 1.99, // valor unitário do produto
-      "total_price": 3.98, // valor total do produto
-    },
-    {
-      "id": 646,
-      "name": "Nome do produto 2",
-      "quantity": 2,
-      "unit_price": 1.99,
-      "total_price": 3.98,
-    },
-  ],
-  "total_price": 7.96 // valor total no carrinho
-}
-```
+4. Copy the `.env.example` and `.env.example.test` files to `.env` and `.env.test` respectively, to configure environment variables:
 
-### 2. Listar itens do carrinho atual
-Criar um endpoint para listar os produtos no carrinho atual.
+    ```bash
+    cp .env.example .env
+    cp .env.example.test .env.test
+    ```
 
-ROTA: `/cart`
+5. Run the project with Docker Compose:
 
-Response:
-```js
-{
-  "id": 789, // id do carrinho
-  "products": [
-    {
-      "id": 645,
-      "name": "Nome do produto",
-      "quantity": 2,
-      "unit_price": 1.99, // valor unitário do produto
-      "total_price": 3.98, // valor total do produto
-    },
-    {
-      "id": 646,
-      "name": "Nome do produto 2",
-      "quantity": 2,
-      "unit_price": 1.99,
-      "total_price": 3.98,
-    },
-  ],
-  "total_price": 7.96 // valor total no carrinho
-}
-```
+    ```bash
+    docker compose up
+    ```
 
-### 3. Alterar a quantidade de produtos no carrinho 
-Um carrinho pode ter _N_ produtos, se o produto já existir no carrinho, apenas a quantidade dele deve ser alterada
+## Additional commands
 
-ROTA: `/cart/add_item`
+After running `docker compose up`, open a new terminal instance and execute one of the steps below:
 
-Payload
+- **Run RSpec tests:**
+
+    ```bash
+    docker compose run --rm test
+    ```
+
+- **Open a bash shell:**
+
+    ```bash
+    docker compose exec web bash
+    ```
+
+## Interacting with the API endpoints
+
+### Create Cart
+
+**POST** `http://localhost:3000/cart`
+
+**Request:**
+
 ```json
 {
-  "product_id": 1230,
+  "product_id": 1,
   "quantity": 1
 }
 ```
-Response:
+
+**Response:**
+
 ```json
 {
   "id": 1,
   "products": [
     {
-      "id": 1230,
-      "name": "Nome do produto X",
-      "quantity": 2, // considerando que esse produto já estava no carrinho
-      "unit_price": 7.00, 
-      "total_price": 14.00, 
-    },
-    {
-      "id": 01020,
-      "name": "Nome do produto Y",
+      "id": 1,
+      "name": "Samsung Galaxy S24 Ultra",
       "quantity": 1,
-      "unit_price": 9.90, 
-      "total_price": 9.90, 
-    },
+      "unit_price": 12999.99,
+      "total_items_price": 12999.99
+    }
   ],
-  "total_price": 23.9
+  "total_price": 12999.99
 }
 ```
 
-### 3. Remover um produto do carrinho 
+### Add item to cart
 
-Criar um endpoint para excluir um produto do do carrinho. 
+**POST** `http://localhost:3000/cart/add_item`
 
-ROTA: `/cart/:product_id`
+**Request:**
 
-
-#### Detalhes adicionais:
-
-- Verifique se o produto existe no carrinho antes de tentar removê-lo.
-- Se o produto não estiver no carrinho, retorne uma mensagem de erro apropriada.
-- Após remover o produto, retorne o payload com a lista atualizada de produtos no carrinho.
-- Certifique-se de que o endpoint lida corretamente com casos em que o carrinho está vazio após a remoção do produto.
-
-### 5. Excluir carrinhos abandonados
-Um carrinho é considerado abandonado quando estiver sem interação (adição ou remoção de produtos) há mais de 3 horas.
-
-- Quando este cenário ocorrer, o carrinho deve ser marcado como abandonado.
-- Se o carrinho estiver abandonado há mais de 7 dias, remover o carrinho.
-- Utilize um Job para gerenciar (marcar como abandonado e remover) carrinhos sem interação.
-- Configure a aplicação para executar este Job nos períodos especificados acima.
-
-### Detalhes adicionais:
-- O Job deve ser executado regularmente para verificar e marcar carrinhos como abandonados após 3 horas de inatividade.
-- O Job também deve verificar periodicamente e excluir carrinhos que foram marcados como abandonados por mais de 7 dias.
-
-### Como resolver
-
-#### Implementação
-Você deve usar como base o código disponível nesse repositório e expandi-lo para que atenda as funcionalidade descritas acima.
-
-Há trechos parcialmente implementados e também sugestões de locais para algumas das funcionalidades sinalizados com um `# TODO`. Você pode segui-los ou fazer da maneira que julgar ser a melhor a ser feita, desde que atenda os contratos de API e funcionalidades descritas.
-
-#### Testes
-Existem testes pendentes, eles estão marcados como <span style="color:green;">Pending</span>, e devem ser implementados para garantir a cobertura dos trechos de código implementados por você.
-Alguns testes já estão passando e outros estão com erro. Com a sua implementação os testes com erro devem passar a funcionar. 
-A adição de novos testes é sempre bem-vinda, mas sem alterar os já implementados.
-
-
-### O que esperamos
-- Implementação dos testes faltantes e de novos testes para os métodos/serviços/entidades criados
-- Construção das 4 rotas solicitadas
-- Implementação de um job para controle dos carrinhos abandonados
-
-
-### Itens adicionais / Legais de ter
-- Utilização de factory na construção dos testes
-- Desenvolvimento do docker-compose / dockerização da app
-
-A aplicação já possui um Dockerfile, que define como a aplicação deve ser configurada dentro de um contêiner Docker. No entanto, para completar a dockerização da aplicação, é necessário criar um arquivo `docker-compose.yml`. O arquivo irá definir como os vários serviços da aplicação (por exemplo, aplicação web, banco de dados, etc.) interagem e se comunicam.
-
-- Adicione tratamento de erros para situações excepcionais válidas, por exemplo: garantir que um produto não possa ter quantidade negativa. 
-
-- Se desejar você pode adicionar a configuração faltante no arquivo `docker-compose.yml` e garantir que a aplicação rode de forma correta utilizando Docker. 
-
-## Informações técnicas
-
-### Dependências
-- ruby 3.3.1
-- rails 7.1.3.2
-- postgres 16
-- redis 7.0.15
-
-### Como executar o projeto
-
-## Executando a app sem o docker
-Dado que todas as as ferramentas estão instaladas e configuradas:
-
-Instalar as dependências do:
-```bash
-bundle install
+```json
+{
+  "product_id": 2,
+  "quantity": 1
+}
 ```
 
-Executar o sidekiq:
-```bash
-bundle exec sidekiq
+**Response:**
+
+```json
+{
+  "id": 1,
+  "products": [
+    {
+      "id": 1,
+      "name": "Samsung Galaxy S24 Ultra",
+      "quantity": 1,
+      "unit_price": 12999.99,
+      "total_items_price": 12999.99
+    },
+    {
+      "id": 2,
+      "name": "iPhone 15 Pro Max",
+      "quantity": 1,
+      "unit_price": 14999.99,
+      "total_items_price": 14999.99
+    }
+  ],
+  "total_price": 27999.98
+}
 ```
 
-Executar projeto:
-```bash
-bundle exec rails server
+### Remove item from cart
+
+**DELETE** `http://localhost:3000/cart/1`
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "products": [
+    {
+      "id": 2,
+      "name": "iPhone 15 Pro Max",
+      "quantity": 1,
+      "unit_price": 14999.99,
+      "total_items_price": 14999.99
+    }
+  ],
+  "total_price": 14999.99
+}
 ```
 
-Executar os testes:
-```bash
-bundle exec rspec
+### View cart
+
+**GET** `http://localhost:3000/cart/`
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "products": [
+    {
+      "id": 2,
+      "name": "iPhone 15 Pro Max",
+      "quantity": 1,
+      "unit_price": 14999.99,
+      "total_items_price": 14999.99
+    }
+  ],
+  "total_price": 14999.99
+}
 ```
 
-### Como enviar seu projeto
-Salve seu código em um versionador de código (GitHub, GitLab, Bitbucket) e nos envie o link publico. Se achar necessário, informe no README as instruções para execução ou qualquer outra informação relevante para correção/entendimento da sua solução.
+### Create cart
+
+**POST** `http://localhost:3000/cart`
+
+**Request:**
+
+```json
+{
+  "product_id": 1,
+  "quantity": 1
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "products": [
+    {
+      "id": 1,
+      "name": "Samsung Galaxy S24 Ultra",
+      "quantity": 1,
+      "unit_price": 12999.99,
+      "total_items_price": 12999.99
+    }
+  ],
+  "total_price": 12999.99
+}
+```
+
+## Managing abandoned carts with sidekiq
+
+This application uses Sidekiq and Redis to manage abandoned shopping carts. A scheduled job `AbandonedCartsCleanupJob` runs periodically to identify and handle carts that have been inactive for a certain period.
+
+**Job functionality:**
+
+The `AbandonedCartsCleanupJob` performs the following actions:
+
+1. **Marking inactive carts:** Identifies carts that have had no user interaction in the last 3 hours and marks them as "abandoned" (`abandoned: true`).
+2. **Removing old abandoned carts:** Deletes carts that have been marked as abandoned for more than 7 days.
+
+**Scheduling configuration:**
+
+The job scheduling is configured in the Sidekiq Scheduler configuration file `config/sidekiq.yml`, as shown in the following example:
+
+```yaml
+:scheduler:
+  :schedule:
+    abandoned_cart_job:
+      cron: "*/5 * * * *" # Executes the job every 5 minutes
+      class: "AbandonedCartsCleanupJob"
+```
+
+This configuration ensures that the `AbandonedCartsCleanupJob` is executed every 5 minutes to clean up abandoned carts.
+
+**Testing abandoned cart marking and removal:**
+
+To verify that the abandoned cart cleanup job is working correctly, follow the steps below:
+
+1. After running the `docker compose up` command, access the web application container:
+
+    ```bash
+    docker compose exec web bash
+    ```
+
+2. Inside the container's bash shell, open the Rails console:
+
+    ```bash
+    bundle exec rails c
+    ```
+
+3. Verify the carts created by `seeds.rb`. The `db/seeds.rb` file creates three carts with different activity states:
+
+    - An active cart (interacted with less than 3 hours ago).
+    - An inactive cart (no interaction for more than 3 hours).
+    - An old abandoned cart (marked as abandoned more than 7 days ago).
+
+    Execute the following commands in the Rails console to check the initial state of the carts:
+
+    ```ruby
+    puts "Total carts: #{Cart.count}"
+    puts "Active carts: #{Cart.where.not(id: Cart.inactive_since(3.hours.ago).pluck(:id)).count}"
+    puts "Inactive carts (should be abandoned): #{Cart.inactive_since(3.hours.ago).where(abandoned: false).count}"
+    puts "Old abandoned carts (should be removed): #{Cart.abandoned_since(7.days.ago).count}"
+    ```
+
+4. Access the Sidekiq dashboard in your browser: [`http://localhost:3000/sidekiq`](http://localhost:3000/sidekiq). Initially, the "Processed" section should show 0 jobs, indicating that the cleanup job has not yet run:
+
+  ![alt text](public/image.png)
+
+5. Wait a few minutes (more than 5 minutes to ensure the scheduled job runs). Refresh the Sidekiq page. You should see one processed job in the "Processed" section, corresponding to the execution of the `AbandonedCartsCleanupJob`:
+
+  ![alt text](public/image-1.png)
+
+6. Return to the Rails console and execute the commands again to check the state of the carts after the job execution:
+
+    ```ruby
+    puts "After job execution:"
+    puts "Total carts: #{Cart.count}"
+    puts "Active carts: #{Cart.where.not(id: Cart.inactive_since(3.hours.ago).pluck(:id)).count}"
+    puts "Abandoned carts: #{Cart.where(abandoned: true).count}"
+    puts "Old abandoned carts (should have been removed): #{Cart.abandoned_since(7.days.ago).count}"
+    ```
+
+    You should observe that:
+
+    - The inactive cart (created with `last_interaction_at` more than 3 hours ago) is now marked as `abandoned: true`.
+    - The old abandoned cart (created with `updated_at` more than 7 days ago and `abandoned: true`) has been removed from the database, decreasing the total cart count.
+    - The active cart remains unchanged.
