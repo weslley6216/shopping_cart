@@ -4,5 +4,5 @@ class CartItemSerializer < ActiveModel::Serializer
   def id = object.product.id
   def name = object.product.name
   def unit_price = object.price.to_f
-  def total_items_price = (object.price * object.quantity).to_f
+  def total_items_price = object.total_items_price
 end
