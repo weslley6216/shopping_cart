@@ -19,5 +19,6 @@ class Cart < ApplicationRecord
     destroy! if abandoned? && updated_at <= 7.days.ago
   end
 
+  def calculate_total_price = cart_items.sum(&:total_items_price)
   def empty? = cart_items.empty?
 end
