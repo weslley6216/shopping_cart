@@ -13,7 +13,7 @@ class AddItemToCartService < BaseCartService
     normalized_quantity = validate_quantity(quantity)
     cart_item = find_or_build_cart_item(cart, product, normalized_quantity)
 
-    save_cart_item!(cart_item)
+    cart_item.save!
     update_cart_total_price!(cart)
 
     cart
@@ -37,6 +37,4 @@ class AddItemToCartService < BaseCartService
     cart_item.quantity += quantity
     cart_item
   end
-
-  def save_cart_item!(cart_item) = cart_item.save!
 end
