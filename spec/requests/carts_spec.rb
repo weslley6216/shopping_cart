@@ -213,17 +213,40 @@ RSpec.describe 'Carts API', type: :request do
 
   describe 'DELETE /cart/remove_item' do
     let(:product) { create(:product, name: 'Boné', price: 15.0) }
-    let(:cart) { create(:cart) }
-    let(:item) { create(:cart_item, cart: cart, product: product, quantity: 2, price: 15.0) }
 
     before { post '/cart', params: { product_id: product.id, quantity: 1 } }
 
-    context 'when product is in the cart' do
-      it 'removes the product and returns the updated cart' do
+    context 'when product is in the cart and it is the only item' do
+      it 'removes the product and returns empty cart message' do
         delete "/cart/#{product.id}"
 
         expect(response).to have_http_status(:ok)
         expect(parsed_response[:message]).to eq('Cart is empty')
+      end
+    end
+
+    context 'when product is in the cart but other items remain' do
+      let(:other_product) { create(:product, name: 'Camiseta', price: 10.0) }
+
+      before { post '/cart/add_item', params: { product_id: other_product.id, quantity: 1 } }
+
+      it 'removes the product and returns updated cart' do
+        delete "/cart/#{product.id}"
+
+        expect(response).to have_http_status(:ok)
+        expect(parsed_response).to eq(
+          id: Cart.last.id,
+          total_price: 10.0,
+          products: [
+            {
+              id: other_product.id,
+              name: 'Camiseta',
+              quantity: 1,
+              unit_price: 10.0,
+              total_items_price: 10.0
+            }
+          ]
+        )
       end
     end
 

@@ -27,8 +27,6 @@ class CartsController < ApplicationController
   end
 
   def remove_item
-    return render json: { error: 'Cart not found' }, status: :not_found unless @current_cart
-
     updated_cart = RemoveItemFromCartService.new(@current_cart, params[:product_id]).call
     return render json: { message: 'Cart is empty' }, status: :ok if updated_cart.empty?
 
