@@ -1,6 +1,6 @@
 # Shopping Cart
 
-Shopping Cart is an application that simulates shopping cart operations, allowing users to create, add items, list and remove products from a cart.
+Shopping Cart is an application that simulates shopping cart operations, where you can create a cart, add items, list and remove products from a cart.
 
 ## Features
 
@@ -16,6 +16,7 @@ Shopping Cart is an application that simulates shopping cart operations, allowin
 - Rails 7.1.3.2
 - RSpec 6.1.0
 - PostgreSQL 16
+- Sidekiq 7.2
 - Redis 7.0.15
 
 ## API endpoints
@@ -188,37 +189,6 @@ After running `docker compose up`, open a new terminal instance and execute one 
     }
   ],
   "total_price": 14999.99
-}
-```
-
-### Create cart
-
-**POST** `http://localhost:3000/cart`
-
-**Request:**
-
-```json
-{
-  "product_id": 1,
-  "quantity": 1
-}
-```
-
-**Response:**
-
-```json
-{
-  "id": 1,
-  "products": [
-    {
-      "id": 1,
-      "name": "Samsung Galaxy S24 Ultra",
-      "quantity": 1,
-      "unit_price": 12999.99,
-      "total_items_price": 12999.99
-    }
-  ],
-  "total_price": 12999.99
 }
 ```
 
