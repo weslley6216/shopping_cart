@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe CartItemSerializer, type: :serializer do
   let(:product) { create(:product, name: 'Camiseta', price: 29.99) }
   let(:cart) { create(:cart) }
-  let(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 2, price: product.price) }
+  let(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 2) }
 
   subject { described_class.new(cart_item) }
 

@@ -7,7 +7,7 @@ RSpec.describe AddItemToCartService do
 
   describe '#call' do
     context 'when the product exists' do
-      let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 1, price: 10.0) }
+      let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 1) }
 
       it 'increments the quantity of the existing item' do
         expect {

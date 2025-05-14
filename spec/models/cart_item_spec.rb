@@ -23,15 +23,8 @@ RSpec.describe CartItem, type: :model do
       expect(cart_item.errors[:quantity]).to include('must be greater than 0')
     end
 
-    it 'validates that price is greater than or equal to 0' do
-      cart_item = build(:cart_item, price: -1)
-
-      expect(cart_item).to_not be_valid
-      expect(cart_item.errors[:price]).to include('must be greater than or equal to 0')
-    end
-
-    it 'is valid with a quantity greater than 0 and price greater than or equal to 0' do
-      cart_item = build(:cart_item, quantity: 1, price: 10.0)
+    it 'is valid with a quantity greater than 0' do
+      cart_item = build(:cart_item, quantity: 1)
 
       expect(cart_item).to be_valid
     end

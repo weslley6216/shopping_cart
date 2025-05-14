@@ -12,7 +12,7 @@ RSpec.describe CartSerializer, type: :serializer do
   before do
     create(:cart_item, cart: cart, product: product1, quantity: 2)
     create(:cart_item, cart: cart, product: product2, quantity: 3)
-    cart.update!(total_price: cart.cart_items.sum('quantity * price'))
+    cart.update!(total_price: cart.calculate_total_price)
   end
 
   it 'serializes the expected attributes' do

@@ -6,7 +6,7 @@ RSpec.describe RemoveItemFromCartService do
     let(:cart) { create(:cart) }
 
     context 'when the item is in the cart with quantity greater than 1' do
-      let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 3, price: product.price) }
+      let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 3) }
 
       it 'decreases the item quantity by 1' do
         described_class.new(cart, product.id).call
@@ -28,7 +28,7 @@ RSpec.describe RemoveItemFromCartService do
     end
 
     context 'when the item is in the cart with quantity equal to 1' do
-      before { create(:cart_item, cart: cart, product: product, quantity: 1, price: product.price) }
+      before { create(:cart_item, cart: cart, product: product, quantity: 1) }
 
       it 'removes the item from the cart' do
         expect {
