@@ -10,5 +10,5 @@
 :scheduler:
   :schedule:
     abandoned_cart_job:
-      cron: "*/15 * * * *"
+      cron: "*/5 * * * *"
       class: "AbandonedCartsCleanupJob"
