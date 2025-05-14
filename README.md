@@ -52,7 +52,7 @@ Shopping Cart is an application that simulates shopping cart operations, where y
 
     ```bash
     cp .env.example .env
-    cp .env.example.test .env.test
+    cp .env.test.example .env.test
     ```
 
 5. Run the project with Docker Compose:
