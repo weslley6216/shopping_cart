@@ -45,7 +45,7 @@ services:
 
   test:
     build: .
-    command: bash -c 'bin/rails db:setup && bundle exec rspec'
+    command: bash -c 'bin/rails db:create db:migrate && bundle exec rspec'
     volumes:
       - .:/store
     depends_on:
