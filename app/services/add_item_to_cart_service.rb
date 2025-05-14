@@ -26,7 +26,7 @@ class AddItemToCartService < BaseCartService
   def find_or_build_cart_item(cart, product, quantity)
     cart_item = cart.cart_items.find_by(product_id: product.id)
 
-    return cart.cart_items.build(product: product, quantity: quantity, price: product.price) unless cart_item
+    return cart.cart_items.build(product: product, quantity: quantity) unless cart_item
 
     cart_item.quantity += quantity
     cart_item
