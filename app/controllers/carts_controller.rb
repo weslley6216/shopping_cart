@@ -20,10 +20,9 @@ class CartsController < ApplicationController
   end
 
   def show
-    cart = current_cart
     return render json: { error: 'Cart not found' }, status: :not_found unless current_cart
 
-    render json: cart, serializer: CartSerializer, status: :ok
+    render json: current_cart, serializer: CartSerializer, status: :ok
   end
 
   def remove_item
