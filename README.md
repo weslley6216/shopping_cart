@@ -243,9 +243,9 @@ To verify that the abandoned cart cleanup job is working correctly, follow the s
 
     ```ruby
     puts "Total carts: #{Cart.count}"
-    puts "Active carts: #{Cart.where.not(id: Cart.inactive_since(3.hours.ago).pluck(:id)).count}"
-    puts "Inactive carts (should be abandoned): #{Cart.inactive_since(3.hours.ago).where(abandoned: false).count}"
-    puts "Old abandoned carts (should be removed): #{Cart.abandoned_since(7.days.ago).count}"
+    puts "Active carts: #{Cart.recently_active.count}"
+    puts "Inactive carts (should be marked as abandoned): #{Cart.inactive_for_abandonment.count}"
+    puts "Old abandoned carts (should be removed): #{Cart.expired_abandoned.count}"
     ```
 
 4. Access the Sidekiq dashboard in your browser: [`http://localhost:3000/sidekiq`](http://localhost:3000/sidekiq). Initially, the "Processed" section should show 0 jobs, indicating that the cleanup job has not yet run:
@@ -261,9 +261,9 @@ To verify that the abandoned cart cleanup job is working correctly, follow the s
     ```ruby
     puts "After job execution:"
     puts "Total carts: #{Cart.count}"
-    puts "Active carts: #{Cart.where.not(id: Cart.inactive_since(3.hours.ago).pluck(:id)).count}"
+    puts "Active carts: #{Cart.recently_active.count}"
     puts "Abandoned carts: #{Cart.where(abandoned: true).count}"
-    puts "Old abandoned carts (should have been removed): #{Cart.abandoned_since(7.days.ago).count}"
+    puts "Old abandoned carts (should have been removed): #{Cart.expired_abandoned.count}"
     ```
 
     You should observe that:
