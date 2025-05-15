@@ -93,10 +93,10 @@ RSpec.describe 'Carts API', type: :request do
       before { post '/cart', params: { product_id: product.id, quantity: 2 } }
 
       it 'returns the current cart with products' do
-        get '/cart'
+          get '/cart'
 
-        expect(response).to have_http_status(:ok)
-        expect(parsed_response).to eq(
+          expect(response).to have_http_status(:ok)
+          expect(parsed_response).to eq(
           id: Cart.last.id,
           total_price: 20.0,
           products: [
@@ -108,9 +108,9 @@ RSpec.describe 'Carts API', type: :request do
               total_items_price: 20.0
             }
           ]
-        )
+          )
+        end
       end
-    end
 
     context 'when there is no cart in the session' do
       it 'returns not found' do
@@ -217,11 +217,12 @@ RSpec.describe 'Carts API', type: :request do
     before { post '/cart', params: { product_id: product.id, quantity: 1 } }
 
     context 'when product is in the cart and it is the only item' do
-      it 'removes the product and returns empty cart message' do
+      it 'removes the product and returns empty items' do
         delete "/cart/#{product.id}"
 
         expect(response).to have_http_status(:ok)
-        expect(parsed_response[:message]).to eq('Cart is empty')
+        expect(parsed_response[:products]).to be_empty
+        expect(parsed_response[:total_price]).to eq(0.0)
       end
     end
 

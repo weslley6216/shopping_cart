@@ -27,7 +27,6 @@ class CartsController < ApplicationController
 
   def remove_item
     updated_cart = RemoveItemFromCartService.new(@current_cart, params[:product_id]).call
-    return render json: { message: 'Cart is empty' }, status: :ok if updated_cart.empty?
 
     render json: updated_cart, serializer: CartSerializer, status: :ok
   end
