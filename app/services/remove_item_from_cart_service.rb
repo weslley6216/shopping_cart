@@ -8,6 +8,7 @@ class RemoveItemFromCartService < BaseCartService
     reduce_or_destroy_item!(cart_item)
     update_cart_total_price!(cart)
     update_last_interaction!
+    cart.unmark_as_abandoned_if_abandoned
 
     cart
   rescue ActiveRecord::RecordNotFound

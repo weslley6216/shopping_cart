@@ -68,5 +68,16 @@ RSpec.describe RemoveItemFromCartService do
         expect { cart.reload.last_interaction_at }.to_not change(cart, :last_interaction_at)
       end
     end
+
+    context 'when removing item from an abandoned cart' do
+      let(:abandoned_cart) { create(:cart, abandoned: true) }
+      let!(:cart_item) { create(:cart_item, cart: abandoned_cart, product: product, quantity: 1) }
+
+      it 'reactivates cart by setting abandoned to false' do
+        expect {
+          described_class.new(abandoned_cart, product.id).call
+        }.to change { abandoned_cart.reload.abandoned? }.from(true).to(false)
+      end
+    end
   end
 end
