@@ -8,8 +8,10 @@ RSpec.describe RemoveItemFromCartService do
     context 'when the item is in the cart with quantity greater than 1' do
       let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 3) }
 
-      it 'decreases the item quantity by 1' do
-        described_class.new(cart, product.id).call
+      it 'decreases the item quantity by 1 and updates last_interaction_at' do
+        expect {
+          described_class.new(cart, product.id).call
+        }.to change(cart.reload, :last_interaction_at)
 
         expect(cart_item.reload.quantity).to eq(2)
       end
@@ -27,13 +29,13 @@ RSpec.describe RemoveItemFromCartService do
       end
     end
 
-    context 'when the item is in the cart with quantity equal to 1' do
+    context 'when the item is in the cart with quantity equal to 1 and updates last_interaction_at' do
       before { create(:cart_item, cart: cart, product: product, quantity: 1) }
 
       it 'removes the item from the cart' do
         expect {
           described_class.new(cart, product.id).call
-        }.to change(CartItem, :count).by(-1)
+        }.to change(cart.reload, :last_interaction_at).and change(CartItem, :count).by(-1)
       end
 
       it 'sets the cart total price to 0' do
@@ -48,6 +50,8 @@ RSpec.describe RemoveItemFromCartService do
         expect {
           described_class.new(cart, 999).call
         }.to raise_error(RemoveItemFromCartService::ProductNotFoundError)
+
+        expect { cart.reload.last_interaction_at }.to_not change(cart, :last_interaction_at)
       end
     end
 
@@ -58,6 +62,8 @@ RSpec.describe RemoveItemFromCartService do
         expect {
           described_class.new(cart, another_product.id).call
         }.to raise_error(RemoveItemFromCartService::ItemNotInCartError)
+
+        expect { cart.reload.last_interaction_at }.to_not change(cart, :last_interaction_at)
       end
     end
   end
