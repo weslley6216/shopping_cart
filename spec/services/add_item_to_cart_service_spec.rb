@@ -67,5 +67,16 @@ RSpec.describe AddItemToCartService do
         expect { cart.reload.last_interaction_at }.to_not change(cart, :last_interaction_at)
       end
     end
+
+    context 'when adding to an abandoned cart' do
+      let(:new_product) { create(:product, price: 25.0) }
+      let(:abandoned_cart) { create(:cart, abandoned: true) }
+
+      it 'reactivates cart' do
+        expect {
+          described_class.new(abandoned_cart, new_product.id, 1).call
+        }.to change { abandoned_cart.reload.abandoned? }.from(true).to(false)
+      end
+    end
   end
 end

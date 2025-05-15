@@ -13,9 +13,11 @@ class AddItemToCartService < BaseCartService
     raise InvalidQuantityError, 'Quantity must be greater than zero.' if quantity <= 0
 
     cart_item = find_or_build_cart_item(cart, product, quantity)
+
     cart_item.save!
     update_cart_total_price!(cart)
     update_last_interaction!
+    cart.unmark_as_abandoned_if_abandoned
 
     cart
   rescue ActiveRecord::RecordNotFound
