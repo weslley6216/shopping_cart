@@ -20,10 +20,9 @@ end
 
 CartItem.find_or_create_by!(cart: active_cart, product: products[0]) do |item|
   item.quantity = 1
-  item.price = products[0].price
 end
 
-active_cart.update!(total_price: active_cart.cart_items.sum('quantity * price'))
+active_cart.update!(total_price: active_cart.calculate_total_price)
 puts "Created active cart (ID: #{active_cart.id})"
 
 # 2. Inactive Cart (must be marked as abandoned)
@@ -33,10 +32,9 @@ end
 
 CartItem.find_or_create_by!(cart: inactive_cart, product: products[1]) do |item|
   item.quantity = 2
-  item.price = products[1].price
 end
 
-inactive_cart.update!(total_price: inactive_cart.cart_items.sum('quantity * price'))
+inactive_cart.update!(total_price: inactive_cart.calculate_total_price)
 puts "Created inactive cart (ID: #{inactive_cart.id}) - Should be abandoned"
 
 # 3. Old Abandoned Cart (must be removed)
@@ -47,10 +45,9 @@ end
 
 CartItem.find_or_create_by!(cart: old_abandoned_cart, product: products[2]) do |item|
   item.quantity = 3
-  item.price = products[2].price
 end
 
-old_abandoned_cart.update!(total_price: old_abandoned_cart.cart_items.sum('quantity * price'))
+old_abandoned_cart.update!(total_price: old_abandoned_cart.calculate_total_price)
 old_abandoned_cart.update_column(:updated_at, 8.days.ago)
 puts "Created old abandoned cart (ID: #{old_abandoned_cart.id}) - Should be removed"
 
