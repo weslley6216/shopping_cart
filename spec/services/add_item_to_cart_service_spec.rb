@@ -8,7 +8,7 @@ RSpec.describe AddItemToCartService do
     context 'when the product exists' do
       let!(:cart_item) { create(:cart_item, cart: cart, product: product, quantity: 1) }
 
-      it 'increments the quantity of the existing item and updates last_interaction_at' do
+      it 'increments quantity and updates last_interaction_at' do
         expect {
           described_class.new(cart, product.id, 3).call
         }.to change(cart.reload, :last_interaction_at)
@@ -18,7 +18,7 @@ RSpec.describe AddItemToCartService do
         expect(cart.reload.total_price).to eq(40.0)
       end
 
-      it 'updates total price correctly' do
+      it 'updates total price' do
         described_class.new(cart, product.id, 2).call
 
         expect(cart_item.reload.quantity).to eq(3)
@@ -26,10 +26,10 @@ RSpec.describe AddItemToCartService do
       end
     end
 
-    context 'when a new product is added to the cart' do
+    context 'when adding a new product' do
       let(:new_product) { create(:product, price: 20.0) }
 
-      it 'adds a new item and updates last_interaction_at' do
+      it 'adds item and updates last_interaction_at' do
         expect {
           described_class.new(cart, new_product.id, 2).call
         }.to change(cart.cart_items, :count).by(1).and change(cart.reload, :last_interaction_at)
@@ -50,8 +50,8 @@ RSpec.describe AddItemToCartService do
       end
     end
 
-    context 'when the quantity is zero or negative' do
-      it 'raises InvalidQuantityError for zero quantity and does not update last_interaction_at' do
+    context 'when the quantity is invalid' do
+      it 'raises InvalidQuantityError for zero quantity' do
         expect {
           described_class.new(cart, product.id, 0).call
         }.to raise_error(AddItemToCartService::InvalidQuantityError, 'Quantity must be greater than zero.')
@@ -59,7 +59,7 @@ RSpec.describe AddItemToCartService do
         expect { cart.reload.last_interaction_at }.to_not change(cart, :last_interaction_at)
       end
 
-      it 'raises InvalidQuantityError for negative quantity and does not update last_interaction_at' do
+      it 'raises InvalidQuantityError for negative quantity' do
         expect {
           described_class.new(cart, product.id, -1).call
         }.to raise_error(AddItemToCartService::InvalidQuantityError, 'Quantity must be greater than zero.')
