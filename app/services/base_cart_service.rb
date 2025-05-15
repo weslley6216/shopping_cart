@@ -12,4 +12,5 @@ class BaseCartService
 
   def find_product(product_id) = Product.find(product_id)
   def update_cart_total_price!(cart) = cart.update!(total_price: cart.calculate_total_price)
+  def update_last_interaction! = cart.update!(last_interaction_at: Time.current)
 end

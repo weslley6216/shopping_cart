@@ -15,6 +15,7 @@ class AddItemToCartService < BaseCartService
     cart_item = find_or_build_cart_item(cart, product, quantity)
     cart_item.save!
     update_cart_total_price!(cart)
+    update_last_interaction!
 
     cart
   rescue ActiveRecord::RecordNotFound
