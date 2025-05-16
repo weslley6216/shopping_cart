@@ -27,7 +27,7 @@ class Cart < ApplicationRecord
     update!(abandoned: true) if !abandoned? && last_interaction_at <= ABANDONMENT_THRESHOLD.ago
   end
 
-  def unmark_as_abandoned_if_abandoned
+  def reactivate_if_abandoned!
     update!(abandoned: false) if abandoned?
   end
 

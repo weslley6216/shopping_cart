@@ -17,7 +17,7 @@ class AddItemToCartService < BaseCartService
     cart_item.save!
     update_cart_total_price!(cart)
     update_last_interaction!
-    cart.unmark_as_abandoned_if_abandoned
+    cart.reactivate_if_abandoned!
 
     cart
   rescue ActiveRecord::RecordNotFound

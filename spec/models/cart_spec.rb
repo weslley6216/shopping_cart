@@ -20,14 +20,14 @@ RSpec.describe Cart, type: :model do
     end
   end
 
-  describe '#unmark_as_abandoned_if_abandoned' do
+  describe '#reactivate_if_abandoned!' do
     let(:cart) { create(:cart) }
 
     context 'when the cart is abandoned' do
       before { cart.update(abandoned: true) }
 
       it 'changes the abandoned status to false' do
-        expect { cart.unmark_as_abandoned_if_abandoned }.to change { cart.abandoned? }.from(true).to(false)
+        expect { cart.reactivate_if_abandoned! }.to change { cart.abandoned? }.from(true).to(false)
       end
     end
 
@@ -35,7 +35,7 @@ RSpec.describe Cart, type: :model do
       before { cart.update(abandoned: false) }
 
       it 'does not change the abandoned status' do
-        expect { cart.unmark_as_abandoned_if_abandoned }.not_to change { cart.abandoned? }.from(false)
+        expect { cart.reactivate_if_abandoned! }.not_to change { cart.abandoned? }.from(false)
       end
     end
   end
