@@ -250,11 +250,11 @@ To verify that the abandoned cart cleanup job is working correctly, follow the s
 
 4. Access the Sidekiq dashboard in your browser: [`http://localhost:3000/sidekiq`](http://localhost:3000/sidekiq). Initially, the "Processed" section should show 0 jobs, indicating that the cleanup job has not yet run:
 
-  ![alt text](public/image.png)
+  ![  !\[alt text\](public/image.png)](public/image.png)
 
 5. Wait a few minutes (more than 5 minutes to ensure the scheduled job runs). Refresh the Sidekiq page. You should see one processed job in the "Processed" section, corresponding to the execution of the `AbandonedCartsCleanupJob`:
 
-  ![alt text](public/image-1.png)
+  ![  !\[alt text\](public/image-1.png)](public/image-1.png)
 
 6. Return to the Rails console and execute the commands again to check the state of the carts after the job execution:
 
