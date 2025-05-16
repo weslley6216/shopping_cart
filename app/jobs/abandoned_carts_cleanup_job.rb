@@ -13,10 +13,10 @@ class AbandonedCartsCleanupJob < ApplicationJob
   private
 
   def mark_abandoned_carts
-    Cart.inactive_for_abandonment.find_each(&:mark_as_abandoned)
+    Cart.inactive_for_abandonment.find_each(&:mark_as_abandoned!)
   end
 
   def remove_old_abandoned_carts
-    Cart.expired_abandoned.find_each(&:remove_if_abandoned)
+    Cart.expired_abandoned.find_each(&:remove_if_abandoned!)
   end
 end
