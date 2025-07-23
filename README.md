@@ -39,7 +39,7 @@ Shopping Cart is an application that simulates shopping cart operations, where y
 2. Clone this repository:
 
     ```bash
-    git clone git@github.com:weslley6216/shopping_cart.git
+    git clone https://github.com/weslley6216/shopping_cart.git
     ```
 
 3. Navigate to the project directory:
