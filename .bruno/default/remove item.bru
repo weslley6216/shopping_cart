@@ -1,0 +1,19 @@
+meta {
+  name: remove item
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{base_url}}/cart/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+settings {
+  encodeUrl: true
+}

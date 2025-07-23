@@ -1,0 +1,22 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/cart
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "product_id": 1,
+    "quantity": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+}
