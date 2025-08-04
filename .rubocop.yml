@@ -1,0 +1,25 @@
+# Omakase Ruby styling for Rails
+inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.4.5
+  SuggestExtensions: false
+  Exclude:
+   - 'bin/**/*'
+   - 'config/**/*'
+   - 'db/**/*'
+   - 'node_modules/**/*'
+   - 'script/**/*'
+   - 'spec/rails_helper.rb'
+   - 'vendor/**/*'
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Metrics/BlockLength:
+  AllowedMethods: ['describe', 'context', 'feature', 'scenario', 'let', 'it']
+Style/Documentation:
+  Enabled: false
+Style/ClassAndModuleChildren:
+  EnforcedStyle: 'compact'
+Style/StringLiterals:
+  EnforcedStyle: single_quotes

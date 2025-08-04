@@ -20,6 +20,7 @@ group :development, :test do
   gem 'factory_bot_rails', '~> 6.4', '>= 6.4.4'
   gem 'pry-byebug', '~> 3.11'
   gem 'rspec-rails', '~> 6.1.0'
+  gem 'rubocop-rails-omakase', require: false
 end
 
 group :development do
